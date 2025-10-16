@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>رفع طلب الزبون</title>
+<style>
+body { font-family: "Tajawal", sans-serif; background-color: #f9f9f9; display: flex; justify-content: center; }
+.container { width: 95%; max-width: 800px; background: #fff; padding: 20px; border-radius: 15px; margin-top: 20px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);}
+h2 { text-align: center; color: #333; }
+label { display: block; margin-top: 10px; font-weight: bold; color: #444; }
+input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+textarea { resize: vertical; }
+.piece { background: #f1f1f1; padding: 10px; border-radius: 10px; margin-top: 10px; position: relative; }
+.delete-btn { position: absolute; top: 10px; left: 10px; background: #e74c3c; color: white; border: none; border-radius: 6px; padding: 3px 8px; cursor: pointer; font-size: 13px; }
+.add-btn, .submit-btn { border: none; border-radius: 8px; cursor: pointer; padding: 10px 15px; font-size: 16px; margin-top: 10px; }
+.add-btn { background: #4CAF50; color: #fff; }
+.submit-btn { background: #007BFF; color: #fff; width: 100%; }
+.add-btn:hover { background: #3fa244; }
+.submit-btn:hover { background: #0056b3; }
+.color-size-container { display: flex; gap: 5px; margin-top: 5px; }
+.color-size-container input { flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>طلبات ازياء القمه</h2>
+
+<form id="orderForm" action="save.php" method="POST" enctype="multipart/form-data">
+
+<label>اسم الزبون</label>
+<input type="text" name="name" required>
+
+<label>رقم الهاتف</label>
+<input type="text" name="phone" placeholder="أدخل رقم الهاتف 11 رقم" required 
+       pattern="\d{11}" title="يجب أن يحتوي رقم الهاتف على 11 رقم فقط" maxlength="11">
+
+<label>نوع الطلب</label>
+<select name="type" required>
+    <option value="">اختر نوع الطلب</option>
+    <option value="جملة">جملة</option>
+    <option value="مفرد">مفرد</option>
+</select>
+
+<label>محافظة الزبون</label>
+<input type="text" name="province" required>
+
+<label>قضاء (منطقة) الزبون</label>
+<input type="text" name="city" required>
+
+<label>الموقع بالتفصيل (اختياري)</label>
+<input type="text" name="address">
+
+<div id="pieces"></div>
+
+<button type="button" class="add-btn" onclick="addPiece()">+ إضافة طلب اخر</button>
+
+<label>ملاحظات الزبون</label>
+<textarea name="notes" rows="3" placeholder="اكتب أي ملاحظات إضافية..."></textarea>
+
+<button type="submit" class="submit-btn">إرسال الطلب</button>
+</form>
+</div>
+
+<script>
+let pieceCount = 0;
+
+function addPiece() {
+    const piecesDiv = document.getElementById("pieces");
+    const newPiece = document.createElement("div");
+    newPiece.classList.add("piece");
+    const pieceId = pieceCount++;
+    newPiece.innerHTML = `
+        <button type="button" class="delete-btn" onclick="deletePiece(this)">🗑</button>
+        <label>صورة القطعة</label>
+        <input type="file" name="image[]" accept="image/*" required>
+        <label>عدد القطع</label>
+        <input type="number" class="numColors" min="1" placeholder="أدخل عدد القطع" required 
+               oninput="generateColorInputs(this, ${pieceId})">
+        <div class="colorsContainer"></div>
+    `;
+    piecesDiv.appendChild(newPiece);
+}
+
+function deletePiece(button) {
+    button.parentElement.remove();
+}
+
+function generateColorInputs(inputElem, pieceId) {
+    const container = inputElem.parentElement.querySelector(".colorsContainer");
+    container.innerHTML = "";
+    const num = parseInt(inputElem.value);
+    if (num > 0) {
+        for(let i=1; i<=num; i++) {
+            const div = document.createElement("div");
+            div.classList.add("color-size-container");
+            div.innerHTML = `
+                <input type="text" name="colors_of_piece${pieceId}[]" placeholder="لون القطعة #${i}" required>
+                <input type="text" name="sizes_of_color${pieceId}[]" placeholder="حجم اللون #${i}" required>
+            `;
+            container.appendChild(div);
+        }
+    }
+}
+</script>
+
+</body>
+</html>
